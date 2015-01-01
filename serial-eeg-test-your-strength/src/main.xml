@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <program xmlns="http://www.kinoma.com/kpr/1">
 	<variable id="concent" value="20" /> 
+	<variable id="difficulty" value="80" />
         
 	<texture id="iconTexture" small="./assets/brainwave_state.png"/>
 	

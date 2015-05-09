@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<program xmlns="http://www.kinoma.com/kpr/1">
+	<variable id="concent" value="20" /> 
+	<container id="maincont" top="0" left="0" bottom="0"
+        right="0" skin="whiteskin"> 
+    </container>
+    <skin id="whiteskin" color="blue">
+        
+    </skin>
+    <picture id="Hammer" width = "170" height = "170" url="'./assets/mallet_allamerican2.png'">
+        
+    </picture>
+    <picture id="BGmeter" width = "122" height="449"
+         url="'./assets/test-your-strength.png'">
+        
+    </picture>
+    <picture id="Ringer" width = "16" height="16" bottom = "concent" url="'./assets/ringer.png'">
+        <behavior>
+            <method id="onAttentionChanged" params="picture,result">
+                <![CDATA[
+                    var test = picture.coordinates;
+                    test.bottom = result.attention*(picture.container.height-picture.height)/100;
+                	picture.coordinates = test
+                ]]>
+            </method>
+        </behavior>
+    </picture>
+    <script>
+        <![CDATA[
+        	var appwin = new maincont
+        	var bgmeter = new BGmeter
+        	var ringer = new Ringer
+        	var hammer = new Hammer
+        	appwin.add (bgmeter);
+        	appwin.add (hammer);
+        	appwin.add (ringer);
+            application.add (appwin);
+            application.behavior = Behavior({
+   onLaunch: function(application) {
+                trace("Launched "+ application.id + "\n")
+                 application.invoke(new MessageWithObject("pins:configure", {
+            sensor: {
+                require: "MindSetSerial",
+                pins: {
+                        eeg:{tx:31, rx:33} // rx not used, just avoids a warning
+                }
+            }}), Message.TEXT);
+    },
+
+   onComplete: function(application, message) {
+          trace("BLL configured.\n");
+      application.invoke(new MessageWithObject("pins:/sensor/read?repeat=on&interval=50&callback=/gotPacket"));
+   },
+});
+
+Handler.bind("/gotPacket", {
+        onInvoke: function(handler, message) {
+                var result = message.requestObject;
+                for(p in result) {
+                        switch (p) {
+                case "signalQuality":
+                        if(result.signalQuality != 200) {
+                            var signalStrength = 200 - result.signalQuality;
+                            trace("Signal Strength: " + signalStrength/200*100 + "%\t");
+                    } else {
+                                // Display this data somehow, we’ll need it
+                trace("Poor contact; please check the headset fit.\n")
+                                        }
+                    break;
+                case "attention":
+                    application.distribute("onAttentionChanged",{attention:result.attention})
+                    trace("Attention: " + result.attention + "%");
+                    break;
+                case "meditation":
+                    // Do something with this data in here
+                    trace("Meditation: " + result.meditation + "%");
+                    break;
+                case "error":
+                        if(result.error) {
+                            trace("Error: " + result.error + "\n");
+                    }
+                    break;
+                default:
+                    break;
+            }
+                trace("\n")
+                }
+        },
+
+        onComplete: function(handler,message) {
+                trace(message.requestObject + "\n");
+        }
+});
+            
+        ]]>
+    </script>
+</program>

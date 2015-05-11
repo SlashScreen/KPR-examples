@@ -7,18 +7,25 @@
     <skin id="whiteskin" color="blue">
         
     </skin>
-    <picture id="Hammer" width = "170" height = "170" url="'./assets/mallet_allamerican2.png'">
+    <picture id="Hammer" left="0" width = "170" height = "170" url="'./assets/mallet_allamerican2.png'">
         <behavior>
             <method id="hammerRot" params="picture,result">
                 <![CDATA[
                     var test = picture.rotation;
-                    picture.rotation = result.signalQuality/10;
+                    picture.rotation = result.signalQuality/5;
                 ]]>
             </method>
             <method id="onCreate" params="picture">
                 <![CDATA[
-                    picture.origin = {x:134,y:349};
+                    picture.origin = {x:0,y:0}//{x:134,y:349};
                     //134 349
+                ]]>
+            </method>
+            <method id="onSignalHammerHeight" params="picture,result">
+                <![CDATA[
+                    var test = picture.coordinates;
+                    test.bottom = result.signalStrength/10;
+                	picture.coordinates = test
                 ]]>
             </method>
         </behavior>
@@ -32,7 +39,7 @@
             <method id="onAttentionChanged" params="picture,result">
                 <![CDATA[
                     var test = picture.coordinates;
-                    test.bottom = result.attention*(picture.container.height-picture.height)/100;
+                    test.bottom = result.attention*(picture.container.height-picture.height)*2;
                 	picture.coordinates = test
                 ]]>
             </method>
@@ -77,7 +84,7 @@ Handler.bind("/gotPacket", {
                             var signalStrength = 200 - result.signalQuality;
                             trace("Signal Strength: " + signalStrength/200*100 + "%\t");
                     } else {
-                                // Display this data somehow, we’ll need it
+                                application.distribute("onSignalHammerHeight",{signalQuality:result.signalQuality})
                 trace("Poor contact; please check the headset fit.\n")
                                         }
                     break;

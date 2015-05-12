@@ -17,14 +17,14 @@
             </method>
             <method id="onLoaded" params="picture">
                 <![CDATA[
-                    picture.origin = {x:0,y:0}//{x:134,y:349};
+                    picture.origin = {x:20,y:picture.height-15}//{x:134,y:349};
                     //134 349
                 ]]>
             </method>
             <method id="onSignalHammerHeight" params="picture,result">
                 <![CDATA[
                     var test = picture.coordinates;
-                    test.bottom = result.signalStrength/10;
+                    test.bottom = result.signalQuality/10;
                 	picture.coordinates = test
                 ]]>
             </method>

@@ -24,8 +24,30 @@
             </method>
             <method id="hammerRot" params="picture,result">
                 <![CDATA[
+                	if(result.signalQuality<50){
+                		picture.active = true
+                	}
+                	else{
+                		picture.active = false
+                	}
                     var test = picture.rotation;
                     picture.rotation = result.signalQuality/5;
+                ]]>
+            </method>
+            <method id="onTouchEnded" params="picture, id, x, y, ticks">
+                <![CDATA[
+                	this.startRot= picture.rotation
+                	this.endRot= 45
+                    picture.time=0
+                    picture.duration=900
+                    picture.start();
+                ]]>
+            </method>
+            <method id="onTimeChanged" params="picture">
+                <![CDATA[
+                    var hammerPos
+                    hammerPos = tween(picture.time,picture.duration,this.startRot,this.endRot);
+                    picture.rotation=hammerPos
                 ]]>
             </method>
         </behavior>
@@ -48,6 +70,11 @@
     <script>
         <![CDATA[
         	var appwin = new maincont
+        	var state = 0
+        	var PREPARING = 0
+        	var WHACK = 1
+        	var PLAYING = 2
+        	var WIN = 3
         	var bgmeter = new BGmeter
         	var ringer = new Ringer
         	var hammer = new Hammer
@@ -79,8 +106,10 @@ Handler.bind("/gotPacket", {
                 for(p in result) {
                         switch (p) {
                 case "signalQuality":
-                		application.distribute("onSignalHammerHeight",{signalQuality:result.signalQuality})
-                		application.distribute("hammerRot",{signalQuality:result.signalQuality})
+                		if (state===PREPARING){
+                			application.distribute("onSignalHammerHeight",{signalQuality:result.signalQuality})
+                			application.distribute("hammerRot",{signalQuality:result.signalQuality})
+                		}
                         if(result.signalQuality != 200) {
                             var signalStrength = 200 - result.signalQuality;
                             trace("Signal Strength: " + signalStrength/200*100 + "%\t");
@@ -89,8 +118,10 @@ Handler.bind("/gotPacket", {
                                         }
                     break;
                 case "attention":
-                    application.distribute("onAttentionChanged",{attention:result.attention})
-                    trace("Attention: " + result.attention + "%");
+                	if(state===PLAYING){
+                    	application.distribute("onAttentionChanged",{attention:result.attention})
+                    	trace("Attention: " + result.attention + "%");
+                    }
                     break;
                 case "meditation":
                     // Do something with this data in here
@@ -112,7 +143,12 @@ Handler.bind("/gotPacket", {
                 trace(message.requestObject + "\n");
         }
 });
-            
+var tween = function(time,duration,start,end){
+	var soFar = time/duration
+	var thisRot = (end-start)*soFar
+	thisRot += start
+	return thisRot
+}
         ]]>
     </script>
 </program>

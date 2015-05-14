@@ -41,7 +41,7 @@
                     picture.time=0
                     picture.duration=100
                     picture.start();
-                    state=2
+                    state=PLAYING;
                 ]]>
             </method>
             <method id="onTimeChanged" params="picture">
@@ -103,11 +103,11 @@
     <script>
         <![CDATA[
         	var appwin = new maincont
-        	var state = 0
         	var PREPARING = 0
         	var WHACK = 1
         	var PLAYING = 2
         	var WIN = 3
+	       	var state = PREPARING
         	var bgmeter = new BGmeter
         	var ringer = new Ringer
         	var hammer = new Hammer

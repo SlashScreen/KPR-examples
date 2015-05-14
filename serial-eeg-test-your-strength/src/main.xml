@@ -88,7 +88,7 @@
             </method>
 			<method id="onFinished" params="picture">
 				<![CDATA[
-					if(state = WIN) {
+					if(state == WIN) {
 						picture.stop()
 						var winMsg = new MessageWithObject("pins:/gumbell/brenda", {duration:250})
 						picture.invoke(winMsg, Message.TEXT)
@@ -190,12 +190,7 @@ var tween = function(time,duration,start,end){
 	thisRot += start
 	return thisRot
 }
-trace(state);
-if(state===PLAYING && result.attention === 100){
-	state = 3
-	//Do something with the Gumball machine or the bell here
-	state = 0
-}
+
         ]]>
     </script>
 </program>

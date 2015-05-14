@@ -7,19 +7,19 @@
     <skin id="whiteskin" color="blue">
         
     </skin>
-    <picture id="Hammer" left="0" width = "170" height = "170" url="'./assets/mallet_allamerican2.png'">
+    <picture id="Hammer" left="0" width = "170" height = "170" bottom="55" url="'./assets/mallet_allamerican2.png'">
         <behavior>
         <method id="onLoaded" params="picture">
                 <![CDATA[
-                    picture.origin = {x:0,y:0}//{x:134,y:349};
-                    //134 349
+                    picture.origin = {x:20,y:picture.height-15}
+                    picture.scale = {x:.85,y:.85}
                 ]]>
             </method>
             <method id="onSignalHammerHeight" params="picture,result">
                 <![CDATA[
-                    var test = picture.coordinates;
+                   /* var test = picture.coordinates;
                     test.bottom = result.signalQuality/10;
-                	picture.coordinates = test
+                	picture.coordinates = test */
                 ]]>
             </method>
             <method id="hammerRot" params="picture,result">
@@ -54,22 +54,29 @@
         </behavior>
     </picture>
     <picture id="BGmeter" width = "122" height="449" bottom="0"
-         url="'./assets/test-your-strength.png'">
+         url="'./assets/Test-your-strength.png'">
         <behavior>
+        <method id="onCreate" params="content">
+            <![CDATA[
+                this.lastAttention=0
+                this.magicNumber = -2.9
+            ]]>
+        </method>
             <method id="onAttentionChanged" params="picture,result">
                 <![CDATA[
-                		if(state=PLAYING){
-                		picture.time=0
-                		picture.duration=300
-                		picture.start();
-                		this.result = result
-                	}
+                var attention = Math.round(result.attention)*this.magicNumber
+                if(attention != this.lastAttention) {
+                	this.startBottom = picture.coordinates.bottom;
+                	this.endBottom = result.attention*this.magicNumber
+                	picture.time = 0;
+                	picture.duration = 660;
+                	picture.start();
+                }
+            	this.lastAttention = attention
                 ]]>
             </method>
             <method id="onTimeChanged" params="picture">
                 <![CDATA[
-                	this.startBottom = picture.coordinates.bottom
-                	this.endBottom = this.startBottom + this.result.attention*3.7*-1
                     var test = picture.coordinates
                     test.bottom = tween(picture.time,picture.duration,this.startBottom,this.endBottom)//result.attention*3.7*-1
                 	picture.coordinates = test
@@ -77,7 +84,7 @@
             </method>
         </behavior>
     </picture>
-    <picture id="Ringer" width = "16" height="16" bottom= "concent" url="'./assets/ringer.png'">
+    <picture id="Ringer" width = "16" height="16" bottom="100" url="'./assets/ringer.png'">
     </picture>
     <script>
         <![CDATA[
@@ -91,8 +98,8 @@
         	var ringer = new Ringer
         	var hammer = new Hammer
         	appwin.add (bgmeter);
-        	appwin.add (hammer);
         	appwin.add (ringer);
+        	appwin.add (hammer);
             application.add (appwin);
             application.behavior = Behavior({
    onLaunch: function(application) {
@@ -162,6 +169,11 @@ var tween = function(time,duration,start,end){
 	return thisRot
 }
 trace(state);
+if(state===PLAYING && result.attention === 100){
+	state = 3
+	//Do something with the Gumball machine or the bell here
+	state = 0
+}
         ]]>
     </script>
 </program>

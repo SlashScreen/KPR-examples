@@ -62,12 +62,17 @@
                 		picture.time=0
                 		picture.duration=300
                 		picture.start();
-                		this.startBottom = picture.coordinates.bottom
-                		this.endBottom = result.attention*3.7*-1
-                    	var test = picture.coordinates;
-                    	test.bottom = tween(picture.time,picture.duration,this.startBottom,this.endBottom)//result.attention*3.7*-1
-                		picture.coordinates = test
+                		this.result = result
                 	}
+                ]]>
+            </method>
+            <method id="onTimeChanged" params="picture">
+                <![CDATA[
+                	this.startBottom = picture.coordinates.bottom
+                	this.endBottom = this.startBottom + this.result.attention*3.7*-1
+                    var test = picture.coordinates
+                    test.bottom = tween(picture.time,picture.duration,this.startBottom,this.endBottom)//result.attention*3.7*-1
+                	picture.coordinates = test
                 ]]>
             </method>
         </behavior>

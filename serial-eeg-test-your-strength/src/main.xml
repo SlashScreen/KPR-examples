@@ -111,14 +111,22 @@
         	var bgmeter = new BGmeter
         	var ringer = new Ringer
         	var hammer = new Hammer
-        	appwin.add (bgmeter);
-        	appwin.add (ringer);
-        	appwin.add (hammer);
-            application.add (appwin);
+        	
+        	var buildUI = function() {
+        		appwin = new maincont
+	        	bgmeter = new BGmeter
+	        	ringer = new Ringer
+	        	hammer = new Hammer
+	        	appwin.add (bgmeter);
+	        	appwin.add (ringer);
+	        	appwin.add (hammer);
+	            application.add (appwin);
+            }
             application.behavior = Behavior({
    onLaunch: function(application) {
                 trace("Launched "+ application.id + "\n")
-                 application.invoke(new MessageWithObject("pins:configure", {
+                buildUI();
+                application.invoke(new MessageWithObject("pins:configure", {
             		sensor: {
                 		require: "MindSetSerial",
                 		pins: {
@@ -133,11 +141,16 @@
                 	},
                 }
             ), Message.TEXT);
-    },
+	},
 
-   onComplete: function(application, message) {
-          trace("BLL configured.\n");
-      application.invoke(new MessageWithObject("pins:/sensor/read?repeat=on&interval=50&callback=/gotPacket"));
+	onComplete: function(application, message) {
+		trace("BLL configured.\n");
+		application.invoke(new MessageWithObject("pins:/sensor/read?repeat=on&interval=50&callback=/gotPacket"));
+	},
+   
+	onReset: function(application, message) {
+		application.remove(application.first);
+		buildUI();
    },
 });
 

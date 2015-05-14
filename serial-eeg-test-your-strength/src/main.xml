@@ -74,9 +74,6 @@
                 }
 				if(result.attention == 100) {
 					state = WIN;
-					var winMsg = new MessageWithObject("pins:/gumbell/brenda", {duration:250})
-					picture.invoke(winMsg, Message.TEXT)
-					application.distribute("onReset")
 				} else {
             		this.lastAttention = attention
 				}
@@ -89,6 +86,16 @@
                 	picture.coordinates = test
                 ]]>
             </method>
+			<method id="onFinished" params="picture">
+				<![CDATA[
+					if(state = WIN) {
+						picture.stop()
+						var winMsg = new MessageWithObject("pins:/gumbell/brenda", {duration:250})
+						picture.invoke(winMsg, Message.TEXT)
+						application.distribute("onReset")
+					}
+				]]>
+			</method>
         </behavior>
     </picture>
     <picture id="Ringer" width = "16" height="16" bottom="100" url="'./assets/ringer.png'">

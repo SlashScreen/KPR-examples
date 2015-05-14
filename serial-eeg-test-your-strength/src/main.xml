@@ -105,12 +105,20 @@
    onLaunch: function(application) {
                 trace("Launched "+ application.id + "\n")
                  application.invoke(new MessageWithObject("pins:configure", {
-            sensor: {
-                require: "MindSetSerial",
-                pins: {
-                        eeg:{tx:31, rx:33} // rx not used, just avoids a warning
+            		sensor: {
+                		require: "MindSetSerial",
+                		pins: {
+                        	eeg:{tx:31, rx:33} // rx not used, just avoids a warning
+                		}	
+                	},
+            		gumbell: {
+                		require: "Pinninator",
+                		pins: {
+                        	out:{pin:24} // back panel near a handy ground
+                		}	
+                	},
                 }
-            }}), Message.TEXT);
+            ), Message.TEXT);
     },
 
    onComplete: function(application, message) {

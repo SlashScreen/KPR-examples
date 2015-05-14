@@ -10,7 +10,7 @@ exports.close=function(){
 }
 exports.brenda = function(parameters){
 	var duration = parameters.duration
-	out.write(1);
+	this.out.write(1);
 	sensorUtils.mdelay(duration);
-	out.write(0)
+	this.out.write(0)
 }

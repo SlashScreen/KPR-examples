@@ -8,7 +8,7 @@ var qualitySlider = new PinsSimulators.AnalogInputAxisDescription({
 	speed : 0.5, 
 	minValue:0, 
 	maxValue:200, 
-	value:150, 
+	value:45, 
 	dataType:"float", 
 	defaultControl:PinsSimulators.SLIDER
 })

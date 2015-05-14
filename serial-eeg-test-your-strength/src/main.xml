@@ -18,7 +18,7 @@
             <method id="onSignalHammerHeight" params="picture,result">
                 <![CDATA[
                     var test = picture.coordinates;
-                    test.bottom = result.signalStrength/10;
+                    test.bottom = result.signalQuality/10;
                 	picture.coordinates = test
                 ]]>
             </method>
@@ -39,8 +39,9 @@
                 	this.startRot= picture.rotation
                 	this.endRot= 45
                     picture.time=0
-                    picture.duration=900
+                    picture.duration=100
                     picture.start();
+                    state=2
                 ]]>
             </method>
             <method id="onTimeChanged" params="picture">
@@ -52,20 +53,26 @@
             </method>
         </behavior>
     </picture>
-    <picture id="BGmeter" width = "122" height="449"
+    <picture id="BGmeter" width = "122" height="449" bottom="0"
          url="'./assets/test-your-strength.png'">
-        
-    </picture>
-    <picture id="Ringer" width = "16" height="16" bottom = "concent" url="'./assets/ringer.png'">
         <behavior>
             <method id="onAttentionChanged" params="picture,result">
                 <![CDATA[
-                    var test = picture.coordinates;
-                    test.bottom = result.attention*(picture.container.height-picture.height)*2;
-                	picture.coordinates = test
+                		if(state=PLAYING){
+                		picture.time=0
+                		picture.duration=300
+                		picture.start();
+                		this.startBottom = picture.coordinates.bottom
+                		this.endBottom = result.attention*3.7*-1
+                    	var test = picture.coordinates;
+                    	test.bottom = tween(picture.time,picture.duration,this.startBottom,this.endBottom)//result.attention*3.7*-1
+                		picture.coordinates = test
+                	}
                 ]]>
             </method>
         </behavior>
+    </picture>
+    <picture id="Ringer" width = "16" height="16" bottom= "concent" url="'./assets/ringer.png'">
     </picture>
     <script>
         <![CDATA[
@@ -149,6 +156,7 @@ var tween = function(time,duration,start,end){
 	thisRot += start
 	return thisRot
 }
+trace(state);
         ]]>
     </script>
 </program>

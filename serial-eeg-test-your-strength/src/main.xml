@@ -72,7 +72,14 @@
                 	picture.duration = 660;
                 	picture.start();
                 }
-            	this.lastAttention = attention
+				if(result.attention == 100) {
+					state = WIN;
+					var winMsg = new MessageWithObject("pins:/gumbell/brenda", {duration:250})
+					picture.invoke(winMsg, Message.TEXT)
+					application.distribute("onReset")
+				} else {
+            		this.lastAttention = attention
+				}
                 ]]>
             </method>
             <method id="onTimeChanged" params="picture">

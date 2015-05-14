@@ -7,53 +7,99 @@
     <skin id="whiteskin" color="blue">
         
     </skin>
-    <picture id="Hammer" left="0" width = "170" height = "170" url="'./assets/mallet_allamerican2.png'">
+    <picture id="Hammer" left="0" width = "170" height = "170" bottom="55" url="'./assets/mallet_allamerican2.png'">
         <behavior>
-            <method id="hammerRot" params="picture,result">
+        <method id="onLoaded" params="picture">
                 <![CDATA[
-                    var test = picture.rotation;
-                    picture.rotation = result.signalQuality/5;
-                ]]>
-            </method>
-            <method id="onLoaded" params="picture">
-                <![CDATA[
-                    picture.origin = {x:20,y:picture.height-15}//{x:134,y:349};
-                    //134 349
+                    picture.origin = {x:20,y:picture.height-15}
+                    picture.scale = {x:.85,y:.85}
                 ]]>
             </method>
             <method id="onSignalHammerHeight" params="picture,result">
                 <![CDATA[
-                    var test = picture.coordinates;
+                   /* var test = picture.coordinates;
                     test.bottom = result.signalQuality/10;
-                	picture.coordinates = test
+                	picture.coordinates = test */
+                ]]>
+            </method>
+            <method id="hammerRot" params="picture,result">
+                <![CDATA[
+                	if(result.signalQuality<50){
+                		picture.active = true
+                	}
+                	else{
+                		picture.active = false
+                	}
+                    var test = picture.rotation;
+                    picture.rotation = result.signalQuality/5;
+                ]]>
+            </method>
+            <method id="onTouchEnded" params="picture, id, x, y, ticks">
+                <![CDATA[
+                	this.startRot= picture.rotation
+                	this.endRot= 45
+                    picture.time=0
+                    picture.duration=100
+                    picture.start();
+                    state=2
+                ]]>
+            </method>
+            <method id="onTimeChanged" params="picture">
+                <![CDATA[
+                    var hammerPos
+                    hammerPos = tween(picture.time,picture.duration,this.startRot,this.endRot);
+                    picture.rotation=hammerPos
                 ]]>
             </method>
         </behavior>
     </picture>
-    <picture id="BGmeter" width = "122" height="449"
-         url="'./assets/test-your-strength.png'">
-        
-    </picture>
-    <picture id="Ringer" width = "16" height="16" bottom = "concent" url="'./assets/ringer.png'">
+    <picture id="BGmeter" width = "122" height="449" bottom="0"
+         url="'./assets/Test-your-strength.png'">
         <behavior>
+        <method id="onCreate" params="content">
+            <![CDATA[
+                this.lastAttention=0
+                this.magicNumber = -2.9
+            ]]>
+        </method>
             <method id="onAttentionChanged" params="picture,result">
                 <![CDATA[
-                    var test = picture.coordinates;
-                    test.bottom = result.attention*(picture.container.height-picture.height)*2;
+                var attention = Math.round(result.attention)*this.magicNumber
+                if(attention != this.lastAttention) {
+                	this.startBottom = picture.coordinates.bottom;
+                	this.endBottom = result.attention*this.magicNumber
+                	picture.time = 0;
+                	picture.duration = 660;
+                	picture.start();
+                }
+            	this.lastAttention = attention
+                ]]>
+            </method>
+            <method id="onTimeChanged" params="picture">
+                <![CDATA[
+                    var test = picture.coordinates
+                    test.bottom = tween(picture.time,picture.duration,this.startBottom,this.endBottom)//result.attention*3.7*-1
                 	picture.coordinates = test
                 ]]>
             </method>
         </behavior>
+    </picture>
+    <picture id="Ringer" width = "16" height="16" bottom="100" url="'./assets/ringer.png'">
     </picture>
     <script>
         <![CDATA[
         	var appwin = new maincont
+        	var state = 0
+        	var PREPARING = 0
+        	var WHACK = 1
+        	var PLAYING = 2
+        	var WIN = 3
         	var bgmeter = new BGmeter
         	var ringer = new Ringer
         	var hammer = new Hammer
         	appwin.add (bgmeter);
-        	appwin.add (hammer);
         	appwin.add (ringer);
+        	appwin.add (hammer);
             application.add (appwin);
             application.behavior = Behavior({
    onLaunch: function(application) {
@@ -79,18 +125,22 @@ Handler.bind("/gotPacket", {
                 for(p in result) {
                         switch (p) {
                 case "signalQuality":
-                		application.distribute("hammerRot",{signalQuality:result.signalQuality})
+                		if (state===PREPARING){
+                			application.distribute("onSignalHammerHeight",{signalQuality:result.signalQuality})
+                			application.distribute("hammerRot",{signalQuality:result.signalQuality})
+                		}
                         if(result.signalQuality != 200) {
                             var signalStrength = 200 - result.signalQuality;
                             trace("Signal Strength: " + signalStrength/200*100 + "%\t");
                     } else {
-                                application.distribute("onSignalHammerHeight",{signalQuality:result.signalQuality})
                 trace("Poor contact; please check the headset fit.\n")
                                         }
                     break;
                 case "attention":
-                    application.distribute("onAttentionChanged",{attention:result.attention})
-                    trace("Attention: " + result.attention + "%");
+                	if(state===PLAYING){
+                    	application.distribute("onAttentionChanged",{attention:result.attention})
+                    	trace("Attention: " + result.attention + "%");
+                    }
                     break;
                 case "meditation":
                     // Do something with this data in here
@@ -112,7 +162,18 @@ Handler.bind("/gotPacket", {
                 trace(message.requestObject + "\n");
         }
 });
-            
+var tween = function(time,duration,start,end){
+	var soFar = time/duration
+	var thisRot = (end-start)*soFar
+	thisRot += start
+	return thisRot
+}
+trace(state);
+if(state===PLAYING && result.attention === 100){
+	state = 3
+	//Do something with the Gumball machine or the bell here
+	state = 0
+}
         ]]>
     </script>
 </program>

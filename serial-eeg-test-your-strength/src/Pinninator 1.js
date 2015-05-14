@@ -1,10 +1,16 @@
 //@module
 exports.pins = {
-	out:{type:"Digital", direction:"out" , baud:9600}
+	out:{type:"Digital", direction:"out"}
 }
 exports.configure=function(parameters){
+	this.out.init();
 }
-this.duration = exports.pins.duration
-out.write(1);
-sensorUtils.mdelay(duration);
-out.write(0)
+exports.close=function(){
+	this.out.close();
+}
+exports.brenda = function(parameters){
+	var duration = parameters.duration
+	out.write(1);
+	sensorUtils.mdelay(duration);
+	out.write(0)
+}

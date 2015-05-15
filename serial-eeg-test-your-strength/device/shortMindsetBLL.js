@@ -30,7 +30,7 @@ exports.read = function() {
 }
 	
 var parsePayload = function(buffer) {
-	var payload = buffer.data;
+	var payload = buffer.payload;
 	var result = {
 		error:null,
 		signalQuality:200,
@@ -64,7 +64,7 @@ var parsePayload = function(buffer) {
 				break;
 		}
 	}
-	return (parseSuccess) ? result: {error:"Parse failed!"};
+	return (parseSuccess) ? result : {error:"Parse failed!"};
 }
 
 exports.close = function(parameters) {

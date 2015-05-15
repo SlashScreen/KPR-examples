@@ -23,9 +23,9 @@ exports.close = function() {
 }
 
 exports.brenda = function(parameters) {
-  this.setValue(1);
+  this.pinsSimulator.delegate("setValue", "bellRing", 1);
   sensorUtils.mdelay(parameters.duration)
-  this.setValue(0)
+  this.pinsSimulator.delegate("setValue", "bellRing", 0);
 }
 
 exports.pins = {

@@ -1,6 +1,6 @@
 //@module
 exports.pins = {
-	out:{type:"Digital", direction:"out"}
+	out:{type:"Digital", direction:"output"}
 }
 exports.configure=function(parameters){
 	this.out.init();

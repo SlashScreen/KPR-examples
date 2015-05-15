@@ -53,13 +53,13 @@
             </method>
         </behavior>
     </picture>
-    <picture id="BGmeter" width = "122" height="449" bottom="0"
-         url="'./assets/Test-your-strength.png'">
+    <picture id="BGmeter" bottom="-150"
+         url="'./assets/HighStriker.png'">
         <behavior>
         <method id="onCreate" params="content">
             <![CDATA[
                 this.lastAttention=0
-                this.magicNumber = -2.9
+                this.magicNumber = -11.9 //-11.4
             ]]>
         </method>
             <method id="onAttentionChanged" params="picture,result">
@@ -84,7 +84,7 @@
             </method>
         </behavior>
     </picture>
-    <picture id="Ringer" width = "16" height="16" bottom="100" url="'./assets/ringer.png'">
+    <picture id="Ringer" bottom="150" url="'./assets/ringer.png'">
     </picture>
     <script>
         <![CDATA[
@@ -171,7 +171,7 @@ var tween = function(time,duration,start,end){
 trace(state);
 if(state===PLAYING && result.attention === 100){
 	state = 3
-	//Do something with the Gumball machine or the bell here
+	//Add the pins function 
 	state = 0
 }
         ]]>

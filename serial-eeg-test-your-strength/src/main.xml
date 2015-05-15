@@ -70,7 +70,7 @@
         <method id="onCreate" params="content">
             <![CDATA[
                 this.lastAttention=0
-                this.magicNumber = -2.9
+                this.magicNumber = -11.9 //-11.4
             ]]>
         </method>
             <method id="onAttentionChanged" params="picture,result">
@@ -97,16 +97,6 @@
                 	picture.coordinates = test
                 ]]>
             </method>
-			<method id="onFinished" params="picture">
-				<![CDATA[
-					if(state == WIN) {
-						picture.stop()
-						var winMsg = new MessageWithObject("pins:/gumbell/brenda", {duration:250})
-						picture.invoke(winMsg, Message.TEXT)
-						application.distribute("onReset")
-					}
-				]]>
-			</method>
         </behavior>
     </picture>
     <picture id="Ringer" width = "16" height="16" bottom="100" url="'./assets/ringer.png'">

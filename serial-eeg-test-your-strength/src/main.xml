@@ -62,12 +62,13 @@
                 <![CDATA[
                     if(state == WHACK) { // hammer just came down.
                     	picture.stop();
-                    	this.startRot = picture.rotation;
-                    	this.endRot = -120;
-                    	picture.time = 0;
-                    	picture.duration = 100;
+                    	this.startRot = picture.rotation
+                    	this.endRot = -120
+                    	picture.time = 0
+                    	picture.duration = 100
+                    	sensorUtils.mdelay(100);
                     	picture.start();
-                    	state = PLAYING;
+                    	state = PLAYING
                     }
                 ]]>
             </method>
@@ -80,7 +81,7 @@
         <method id="onCreate" params="content">
             <![CDATA[
                 this.lastAttention=0
-                this.magicNumber = -11.9 //-11.4
+                this.magicNumber = -11.53
             ]]>
         </method>
             <method id="onAttentionChanged" params="picture,result">
@@ -89,7 +90,7 @@
                 if(attention != this.lastAttention) {
 					trace("Attention: " + result.attention + "%\n");
                 	this.startBottom = picture.coordinates.bottom;
-                	this.endBottom = result.attention*this.magicNumber
+                	this.endBottom = (result.attention+4.5)*this.magicNumber
                 	picture.time = 0;
                 	picture.duration = 660;
                 	picture.start();

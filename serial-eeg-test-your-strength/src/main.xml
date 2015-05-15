@@ -31,8 +31,11 @@
                 	else{
                 		picture.active = false
                 	}
-                    var test = picture.rotation;
-                    picture.rotation = result.signalQuality/5;
+                	this.startRot = picture.rotation;
+                	this.endRot = result.signalQuality/3-40
+                	picture.time=0
+                    picture.duration=100
+                    picture.start();
                 ]]>
             </method>
             <method id="onTouchEnded" params="picture, id, x, y, ticks">
@@ -42,10 +45,10 @@
                     picture.time=0
                     picture.duration=100
                     picture.start();
-                    state=PLAYING;
                     picture.exclusiveTouch = false;
                     picture.active = false;
                     picture.container.active = true;
+                    state = WHACK
                 ]]>
             </method>
             <method id="onTimeChanged" params="picture">
@@ -55,6 +58,20 @@
                     picture.rotation=hammerPos
                 ]]>
             </method>
+            <method id="onFinished" params="picture">
+                <![CDATA[
+                    if(state == WHACK) { // hammer just came down.
+                    	picture.stop();
+                    	this.startRot = picture.rotation;
+                    	this.endRot = -120;
+                    	picture.time = 0;
+                    	picture.duration = 100;
+                    	picture.start();
+                    	state = PLAYING;
+                    }
+                ]]>
+            </method>
+            
         </behavior>
     </picture>
     <picture id="BGmeter"  bottom="-150"
@@ -91,6 +108,17 @@
                 	picture.coordinates = test
                 ]]>
             </method>
+            <method id="onFinished" params="picture">
+				<![CDATA[
+					if(state == WIN) {
+						picture.stop()
+						var winMsg = new MessageWithObject("pins:/gumbell/brenda", {duration:250})
+						picture.invoke(winMsg, Message.TEXT)
+						application.distribute("onReset")
+					}
+				]]>
+			</method>
+            
         </behavior>
     </picture>
     <picture id="Ringer" bottom="150" url="'./assets/ringer.png'">
@@ -163,7 +191,7 @@ Handler.bind("/gotPacket", {
                             var signalStrength = 200 - result.signalQuality;
                             //trace("Signal Strength: " + signalStrength/200*100 + "%\t");
                     } else {
-                trace("Poor contact; please check the headset fit.\n")
+                		trace("Poor contact; please check the headset fit.\n")
                                         }
                     break;
                 case "attention":

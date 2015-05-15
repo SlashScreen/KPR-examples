@@ -81,7 +81,7 @@
         <method id="onCreate" params="content">
             <![CDATA[
                 this.lastAttention=0
-                this.magicNumber = -11.53
+                this.magicNumber = -11.5
             ]]>
         </method>
             <method id="onAttentionChanged" params="picture,result">

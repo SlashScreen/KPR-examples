@@ -113,6 +113,7 @@
 				<![CDATA[
 					if(state == WIN) {
 						picture.stop()
+						bellCheerSound.play();
 						var winMsg = new MessageWithObject("pins:/gumbell/brenda", {duration:250})
 						picture.invoke(winMsg, Message.TEXT)
 						application.distribute("onReset")
@@ -135,6 +136,10 @@
         	var bgmeter = new BGmeter
         	var ringer = new Ringer
         	var hammer = new Hammer
+        	
+        	var bellSound =  new Sound("./assets/bell.mp3")
+        	var cheerSound = new Sound("./assets/cheering.wav")
+        	var bellCheerSound = new Sound("./assets/bellCheer.mp3")
         	
         	var buildUI = function() {
 		       	state = PREPARING

@@ -12,8 +12,7 @@
             </method>
         </behavior> 
     </container>
-    
-    <skin id="whiteskin" color="white">
+    <skin id="whiteskin" color="blue">
         
     </skin>
     <picture id="Hammer" left="0" width = "170" height = "170" bottom="55" url="'./assets/mallet_allamerican2.png'" exclusiveTouch = "true">
@@ -50,6 +49,7 @@
                     picture.time=0
                     picture.duration=100
                     picture.start();
+                    state=PLAYING;
                     picture.exclusiveTouch = false;
                     picture.active = false;
                     picture.container.active = true;
@@ -62,23 +62,10 @@
                     picture.rotation=hammerPos
                 ]]>
             </method>
-            <method id="onFinished" params="picture">
-                <![CDATA[
-                	if(state == PREPARING) { // hammer just came down
-	                    this.startRot= picture.rotation
-	                	this.endRot= -90
-	                    picture.time=0
-	                    picture.duration=250
-	                    picture.start();
-                    	state=PLAYING;
-                    } else { // Hammer just bounced back up
-                    	picture.container.remove(picture); // hammer disappears
-                    }
-                ]]>
-            </method>
         </behavior>
     </picture>
-    <picture id="BGmeter" bottom="-150" url="'./assets/HighStriker.png'">
+    <picture id="BGmeter" width = "122" height="449" bottom="0"
+         url="'./assets/Test-your-strength.png'">
         <behavior>
         <method id="onCreate" params="content">
             <![CDATA[
@@ -90,7 +77,6 @@
                 <![CDATA[
                 var attention = Math.round(result.attention)*this.magicNumber
                 if(attention != this.lastAttention) {
-					trace("Attention: " + result.attention + "%\n");
                 	this.startBottom = picture.coordinates.bottom;
                 	this.endBottom = result.attention*this.magicNumber
                 	picture.time = 0;
@@ -200,7 +186,7 @@ Handler.bind("/gotPacket", {
                 case "attention":
                 	if(state===PLAYING){
                     	application.distribute("onAttentionChanged",{attention:result.attention})
-                    	//trace("Attention: " + result.attention + "%\n");
+                    	trace("Attention: " + result.attention + "%");
                     }
                     break;
                 case "meditation":

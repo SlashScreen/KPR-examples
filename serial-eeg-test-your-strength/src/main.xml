@@ -1,6 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <program xmlns="http://www.kinoma.com/kpr/1">
 	<variable id="concent" value="20" /> 
+	<texture id="iconTexture" small="./assets/brainwave_state.png"/>
+ 	<skin id="signalState" texture="iconTexture" x="0" y="0" width="80" height="80">
+		<variants offset="80" names="NG,OK,SOSO"/>
+	</skin>
+	<content id="SignalIndicator" left="225" bottom="15" width = "80" height = "80" skin="signalState">
+         <behavior>
+			<method id="onSignalChange" params="content,params">
+                <![CDATA[
+                    if (params.hasOwnProperty('visible')) {
+                    	content.visible = params.visible;
+                    }
+                    if (params.hasOwnProperty('variant')) {
+                    	content.variant = params.variant;
+                    }
+                ]]>
+            </method>        	
+        </behavior>
+    </content>
 	
 	<container id="maincont" top="0" left="0" bottom="0"
         right="0" skin="whiteskin"  active = "false">
@@ -115,9 +133,9 @@
 				<![CDATA[
 					if(state == WIN) {
 						picture.stop()
-						        	var bellSound =  new Sound("./assets/bell.mp3")
-        	var cheerSound = new Sound("./assets/cheering.wav")
-        	var bellCheerSound = new Sound("./assets/bellCheer.mp3")
+						var bellSound =  new Sound("./assets/bell.mp3")
+        				var cheerSound = new Sound("./assets/cheering.wav")
+        				var bellCheerSound = new Sound("./assets/bellCheer.mp3")
 						bellCheerSound.play();
 						var winMsg = new MessageWithObject("pins:/gumbell/brenda", {duration:250})
 						picture.invoke(winMsg, Message.TEXT)
@@ -141,6 +159,8 @@
         	var bgmeter = new BGmeter
         	var ringer = new Ringer
         	var hammer = new Hammer
+        	var signalHead = new SignalIndicator
+        	var signalState = {};
         	
         	var buildUI = function() {
 		       	state = PREPARING
@@ -151,6 +171,7 @@
 	        	appwin.add (bgmeter);
 	        	appwin.add (ringer);
 	        	appwin.add (hammer);
+	        	appwin.add(signalHead);
 	            application.add (appwin);
             }
             application.behavior = Behavior({
@@ -195,9 +216,13 @@ Handler.bind("/gotPacket", {
                 			application.distribute("hammerRot",{signalQuality:result.signalQuality})
                 		}
                         if(result.signalQuality != 200) {
+                    	signalState = {visible:true, variant:result.signalQuality < 47 ? OK : SOSO}
+                   		application.distribute("onSignalChange", signalState);
                             var signalStrength = 200 - result.signalQuality;
                             //trace("Signal Strength: " + signalStrength/200*100 + "%\t");
                     } else {
+                    	signalState = {visible:true, variant:NG}
+                   		application.distribute("onSignalChange", signalState);
                 		trace("Poor contact; please check the headset fit.\n")
                                         }
                     break;

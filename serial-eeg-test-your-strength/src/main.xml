@@ -103,21 +103,24 @@
         <method id="onCreate" params="content">
             <![CDATA[
                 this.lastAttention=0
-                this.magicNumber = -11.5
+                this.magicNumber = -9.2*difficulty
+                this.strikerBase = -58
+                this.strikerBell = -1495
+                this.strikerRange = this.strikerBell - this.strikerBase
             ]]>
         </method>
             <method id="onAttentionChanged" params="picture,result">
                 <![CDATA[
-                var attention = Math.round(result.attention)*this.magicNumber
+                var attention = Math.round(result.attention)
                 if(attention != this.lastAttention) {
 					trace("Attention: " + result.attention + "%\n");
                 	this.startBottom = picture.coordinates.bottom;
-                	this.endBottom = (result.attention+4.5)*this.magicNumber
+                	this.endBottom = result.attention/100 * this.strikerRange + this.strikerBase
                 	picture.time = 0;
                 	picture.duration = 660;
                 	picture.start();
                 }
-				if(result.attention == 100) {
+				if(attention >= 100 * difficulty ) {
 					state = WIN;
 				} else {
             		this.lastAttention = attention
@@ -162,6 +165,7 @@
         	var ringer = new Ringer
         	var hammer = new Hammer
         	var signalState = {};
+        	var difficulty = 0.80
         	
         	var buildUI = function() {
 		       	state = PREPARING

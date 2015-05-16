@@ -62,6 +62,8 @@
                 <![CDATA[
                     if(state == WHACK) { // hammer just came down.
                     	picture.stop();
+                    	var Whap =  new Sound("./assets/WHAP!.mp3")
+                    	Whap.play();
                     	this.startRot = picture.rotation
                     	this.endRot = -120
                     	picture.time = 0
@@ -113,6 +115,9 @@
 				<![CDATA[
 					if(state == WIN) {
 						picture.stop()
+						        	var bellSound =  new Sound("./assets/bell.mp3")
+        	var cheerSound = new Sound("./assets/cheering.wav")
+        	var bellCheerSound = new Sound("./assets/bellCheer.mp3")
 						bellCheerSound.play();
 						var winMsg = new MessageWithObject("pins:/gumbell/brenda", {duration:250})
 						picture.invoke(winMsg, Message.TEXT)
@@ -136,10 +141,6 @@
         	var bgmeter = new BGmeter
         	var ringer = new Ringer
         	var hammer = new Hammer
-        	
-        	var bellSound =  new Sound("./assets/bell.mp3")
-        	var cheerSound = new Sound("./assets/cheering.wav")
-        	var bellCheerSound = new Sound("./assets/bellCheer.mp3")
         	
         	var buildUI = function() {
 		       	state = PREPARING

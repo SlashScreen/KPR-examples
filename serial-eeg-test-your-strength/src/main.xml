@@ -1,27 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <program xmlns="http://www.kinoma.com/kpr/1">
 	<variable id="concent" value="20" /> 
+        
 	<texture id="iconTexture" small="./assets/brainwave_state.png"/>
- 	<skin id="signalState" texture="iconTexture" x="0" y="0" width="80" height="80">
-		<variants offset="80" names="NG,OK,SOSO"/>
-	</skin>
-	<content id="SignalIndicator" left="225" bottom="15" width = "80" height = "80" skin="signalState">
-         <behavior>
-			<method id="onSignalChange" params="content,params">
-                <![CDATA[
-                    if (params.hasOwnProperty('visible')) {
-                    	content.visible = params.visible;
-                    }
-                    if (params.hasOwnProperty('variant')) {
-                    	content.variant = params.variant;
-                    }
-                ]]>
-            </method>        	
-        </behavior>
-    </content>
-	
+ 	
 	<container id="maincont" top="0" left="0" bottom="0"
-        right="0" skin="whiteskin"  active = "false">
+        right="0" skin="whiteskin"  active = "false">     
         <behavior>
             <method id="onTouchEnded" params="content, id, x, y, ticks">
                 <![CDATA[
@@ -29,6 +13,24 @@
                 ]]>
             </method>
         </behavior> 
+    	<content left="225" bottom="15" width = "80" height = "80" >
+			<skin texture="iconTexture" x="0" y="0" width="80" height="80">
+				<variants offset="80" names="NG,OK,SOSO"/>
+			</skin>
+	        <behavior>
+				<method id="onSignalChange" params="content,params">
+	                <![CDATA[
+	                    if (params.hasOwnProperty('visible')) {
+	                    	content.visible = params.visible;
+	                    }
+	                    if (params.hasOwnProperty('variant')) {
+	                    	content.variant = params.variant;
+	                    }
+	                ]]>
+	            </method>        	
+	        </behavior>
+    	</content>
+	
     </container>
     <skin id="whiteskin" color="white">
         
@@ -159,7 +161,6 @@
         	var bgmeter = new BGmeter
         	var ringer = new Ringer
         	var hammer = new Hammer
-        	var signalHead = new SignalIndicator
         	var signalState = {};
         	
         	var buildUI = function() {
@@ -171,8 +172,8 @@
 	        	appwin.add (bgmeter);
 	        	appwin.add (ringer);
 	        	appwin.add (hammer);
-	        	appwin.add(signalHead);
 	            application.add (appwin);
+
             }
             application.behavior = Behavior({
    onLaunch: function(application) {

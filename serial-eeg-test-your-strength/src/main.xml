@@ -3,7 +3,122 @@
 	<variable id="concent" value="20" /> 
         
 	<texture id="iconTexture" small="./assets/brainwave_state.png"/>
- 	
+	
+ 	<column id="HighStriker" left="0" bottom = "-150" right="0" anchor = "STRIKER">
+	    <picture anchor = "BELL" name = "bell" left="0" height="110" right="0" url="'./assets/HighStriker_bell.png'">
+	        <behavior>
+                <method id="onLoaded" params="picture">
+                    <![CDATA[
+                        bellHeight = picture.height
+                    ]]>
+                </method>
+            </behavior>
+	        
+	    </picture>
+
+	    <container anchor = "SLIDER_RINGER" height = "1171">
+		    <picture anchor = "SLIDER" name = "slider" height="1171" url="'./assets/HighStriker_slide.png'" >
+		        <behavior>
+	                <method id="onLoaded" params="picture">
+	                    <![CDATA[
+	                        sliderRange = picture.height
+	                    ]]>
+	                </method>
+	            </behavior>
+		    </picture>
+		    <picture anchor = "RINGER" bottom = "0" name = "ringer" url="'./assets/ringer.png'"  >
+		    	<behavior>
+                    <method id="onSliderScrolled" params="ringer,data">
+                        <![CDATA[
+	                        
+			                	this.startBottom = ringer.coordinates.bottom;
+			                	this.endBottom = (data.bottom-bellHeight -baseHeight )*-1
+			                	ringer.time = 0;
+			                	ringer.duration = data.duration;
+			                	ringer.start();
+                        ]]>
+                    </method>
+                    <method id="onTimeChanged" params="ringer">
+			            <![CDATA[
+			                var ringerCoords = ringer.coordinates
+			                if(state == WIN) {
+			                    ringerCoords.bottom = tween(ringer.time,ringer.duration,this.startBottom,this.endBottom, "quadEaseIn")
+			                } else {
+			                    ringerCoords.bottom = tween(ringer.time,ringer.duration,this.startBottom,this.endBottom, "quadEaseInOut")
+							}	                	
+			            	ringer.coordinates = ringerCoords
+			            ]]>
+			        </method>
+                </behavior>
+    		</picture>
+        </container>
+		   
+		    <picture anchor = "BASE" name = "base" height="219" url="'./assets/HighStriker_base.png'" >
+		        <behavior>
+	                <method id="onLoaded" params="picture">
+	                    <![CDATA[
+	                        baseHeight = picture.height
+	                    ]]>
+	                </method>
+	            </behavior>
+		        
+		    </picture>
+    	<behavior>
+            <method id="onCreate" params="content">
+		        <![CDATA[
+		            this.lastAttention=0
+		        ]]>
+		    </method>
+	        <method id="onAttentionChanged" params="striker,result">
+	            <![CDATA[
+	                var attention = Math.round(result.attention)
+						if(attention >= 100 * difficulty ) result.attention = 100*difficulty
+	                if(attention != this.lastAttention) {
+						trace("Attention: " + result.attention + "%\n");
+	                	this.startBottom = striker.coordinates.bottom;
+	                	this.endBottom = result.attention / -100 * sliderRange 
+	                	striker.time = 0;
+	                	striker.duration = 660;
+						application.distribute("onSliderScrolled", {bottom:this.endBottom, duration:striker.duration});
+	                	striker.start();
+	                }
+					if(attention >= 100 * difficulty ) {
+						state = WIN;
+					} else {
+	            		this.lastAttention = attention
+					}
+	                ]]>
+	        </method>
+	        <method id="onTimeChanged" params="striker">
+	            <![CDATA[
+	                var test = striker.coordinates
+	                if(state == WIN) {
+	                    test.bottom = tween(striker.time,striker.duration,this.startBottom,this.endBottom, "quadEaseIn")
+	                } else {
+	                    test.bottom = tween(striker.time,striker.duration,this.startBottom,this.endBottom, "quadEaseInOut")
+					}	                	
+	            	striker.coordinates = test
+	            ]]>
+	        </method>
+	        <method id="onFinished" params="striker">
+				<![CDATA[
+					if(state == WIN) {
+						striker.stop()
+						var bellSound =  new Sound("./assets/bell.mp3")
+	    				var cheerSound = new Sound("./assets/cheering.wav")
+	    				var bellCheerSound = new Sound("./assets/bellCheer.mp3")
+						bellCheerSound.play();
+						var winMsg = new MessageWithObject("pins:/gumbell/brenda", {duration:250})
+						striker.invoke(winMsg, Message.TEXT)
+						application.distribute("onReset")
+					}
+				]]>
+			</method>
+	        
+	    </behavior>
+	    
+	</column>
+	
 	<container id="maincont" top="0" left="0" bottom="0"
         right="0" skin="whiteskin"  active = "false">     
         <behavior>
@@ -54,7 +169,7 @@
                 	this.startRot = picture.rotation;
                 	this.endRot = result.signalQuality/3-40
                 	picture.time=0
-                    picture.duration=100
+                    picture.duration=150
                     picture.start();
                 ]]>
             </method>
@@ -63,7 +178,7 @@
                 	this.startRot= picture.rotation
                 	this.endRot= 45
                     picture.time=0
-                    picture.duration=100
+                    picture.duration=200
                     picture.start();
                     picture.exclusiveTouch = false;
                     picture.active = false;
@@ -87,7 +202,7 @@
                     	this.startRot = picture.rotation
                     	this.endRot = -120
                     	picture.time = 0
-                    	picture.duration = 100
+                    	picture.duration = 400
                     	sensorUtils.mdelay(100);
                     	picture.start();
                     	state = PLAYING
@@ -97,67 +212,8 @@
             
         </behavior>
     </picture>
-    <picture id="BGmeter"  bottom="-150"
-         url="'./assets/HighStriker.png'">
-        <behavior>
-        <method id="onCreate" params="content">
-            <![CDATA[
-                this.lastAttention=0
-                this.magicNumber = -9.2*difficulty
-                this.strikerBase = -58
-                this.strikerBell = -1495
-                this.strikerRange = this.strikerBell - this.strikerBase
-            ]]>
-        </method>
-            <method id="onAttentionChanged" params="picture,result">
-                <![CDATA[
-                var attention = Math.round(result.attention)
-					if(attention >= 100 * difficulty ) result.attention = 100*difficulty
-                if(attention != this.lastAttention) {
-					trace("Attention: " + result.attention + "%\n");
-                	this.startBottom = picture.coordinates.bottom;
-                	this.endBottom = result.attention/100 * this.strikerRange + this.strikerBase
-                	picture.time = 0;
-                	picture.duration = 660;
-                	picture.start();
-                }
-				if(attention >= 100 * difficulty ) {
-					state = WIN;
-				} else {
-            		this.lastAttention = attention
-				}
-                ]]>
-            </method>
-            <method id="onTimeChanged" params="picture">
-                <![CDATA[
-                    var test = picture.coordinates
-                    if(state == WIN) {
-	                    test.bottom = tween(picture.time,picture.duration,this.startBottom,this.endBottom, "quadEaseIn")
-	                } else {
-	                    test.bottom = tween(picture.time,picture.duration,this.startBottom,this.endBottom, "quadEaseInOut")
-					}	                	
-                	picture.coordinates = test
-                ]]>
-            </method>
-            <method id="onFinished" params="picture">
-				<![CDATA[
-					if(state == WIN) {
-						picture.stop()
-						var bellSound =  new Sound("./assets/bell.mp3")
-        				var cheerSound = new Sound("./assets/cheering.wav")
-        				var bellCheerSound = new Sound("./assets/bellCheer.mp3")
-						bellCheerSound.play();
-						var winMsg = new MessageWithObject("pins:/gumbell/brenda", {duration:250})
-						picture.invoke(winMsg, Message.TEXT)
-						application.distribute("onReset")
-					}
-				]]>
-			</method>
-            
-        </behavior>
-    </picture>
-    <picture id="Ringer" bottom="150" url="'./assets/ringer.png'">
-    </picture>
+    
+
     <script>
         <![CDATA[
         	var appwin = new maincont
@@ -166,44 +222,42 @@
         	var PLAYING = 2
         	var WIN = 3
 	       	var state = PREPARING
-        	var bgmeter = new BGmeter
-        	var ringer = new Ringer
         	var hammer = new Hammer
+        	var striker = new HighStriker
         	var signalState = {};
         	var difficulty = 0.80
+        	var sliderRange, baseHeight, bellHeight
         	
         	var buildUI = function() {
 		       	state = PREPARING
         		appwin = new maincont
-	        	bgmeter = new BGmeter
-	        	ringer = new Ringer
+	        	striker = new HighStriker
 	        	hammer = new Hammer
-	        	appwin.add (bgmeter);
-	        	appwin.add (ringer);
+	        	appwin.add (striker);
 	        	appwin.add (hammer);
 	            application.add (appwin);
 
             }
             application.behavior = Behavior({
-   onLaunch: function(application) {
-                trace("Launched "+ application.id + "\n")
-                buildUI();
-                application.invoke(new MessageWithObject("pins:configure", {
-            		sensor: {
-                		require: "MindSetSerial",
-                		pins: {
-                        	eeg:{tx:31, rx:33} // rx not used, just avoids a warning
-                		}	
-                	},
-            		gumbell: {
-                		require: "Pinninator",
-                		pins: {
-                        	out:{pin:24} // back panel near a handy ground
-                		}	
-                	},
-                }
-            ), Message.TEXT);
-	},
+   				onLaunch: function(application) {
+                	trace("Launched "+ application.id + "\n")
+	                buildUI();
+	                application.invoke(new MessageWithObject("pins:configure", {
+	            		sensor: {
+	                		require: "MindSetSerial",
+	                		pins: {
+	                        	eeg:{tx:31, rx:33} // rx not used, just avoids a warning
+	                		}	
+	                	},
+	            		gumbell: {
+	                		require: "Pinninator",
+	                		pins: {
+	                        	out:{pin:24} // back panel near a handy ground
+	                		}	
+	                	},
+	                }
+	            ), Message.TEXT);
+			},
 
 	onComplete: function(application, message) {
 		trace("BLL configured.\n");
@@ -271,6 +325,15 @@ var tween = function(time,duration,start,end,easeType){
 	            break;
 	        case "quadEaseIn":
 	            var soFar = Math.quadEaseIn(time/duration);
+	            break;
+	        case "bounceEaseInOut":
+	            var soFar = Math.bounceEaseInOut(time/duration);
+	            break;
+	        case "quintEaseInOut":
+	            var soFar = Math.quintEaseInOut(time/duration);
+	            break;
+	        case "quintEaseIn":
+	            var soFar = Math.quintEaseIn(time/duration);
 	            break;
 	        default:
 	            break;

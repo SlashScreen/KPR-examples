@@ -30,9 +30,9 @@
 		    	<behavior>
                     <method id="onSliderScrolled" params="ringer,data">
                         <![CDATA[
-	                        
+	                        	this.followed = false // "camera" hasn't started yet
 			                	this.startBottom = ringer.coordinates.bottom;
-			                	this.endBottom = (data.bottom-bellHeight -baseHeight )*-1
+			                	this.endBottom = data.delta
 			                	ringer.time = 0;
 			                	ringer.duration = data.duration;
 			                	ringer.start();
@@ -47,6 +47,11 @@
 			                    ringerCoords.bottom = tween(ringer.time,ringer.duration,this.startBottom,this.endBottom, "quadEaseInOut")
 							}	                	
 			            	ringer.coordinates = ringerCoords
+			            	// start the "camera" following a little later
+			            	if(ringer.time/ringer.duration > 0.15 && this.followed == false) {
+								application.distribute("onCameraFollow");
+								this.followed = true // only once per attentionChange
+							}			            	
 			            ]]>
 			        </method>
                 </behavior>
@@ -77,10 +82,8 @@
 						trace("Attention: " + result.attention + "%\n");
 	                	this.startBottom = striker.coordinates.bottom;
 	                	this.endBottom = result.attention / -100 * sliderRange 
-	                	striker.time = 0;
-	                	striker.duration = 660;
-						application.distribute("onSliderScrolled", {bottom:this.endBottom, duration:striker.duration});
-	                	striker.start();
+	                	
+						application.distribute("onSliderScrolled", {delta:this.endBottom, duration:striker.duration});
 	                }
 					if(attention >= 100 * difficulty ) {
 						state = WIN;
@@ -89,6 +92,13 @@
 					}
 	                ]]>
 	        </method>
+			<method id="onCameraFollow" params="striker, delta">
+                 <![CDATA[
+					striker.time = 0;
+					striker.duration = 660;
+					striker.start();
+                 ]]>
+			</method>
 	        <method id="onTimeChanged" params="striker">
 	            <![CDATA[
 	                var test = striker.coordinates

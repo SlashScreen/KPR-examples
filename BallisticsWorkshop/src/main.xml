@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="utf-8"?>
+<program xmlns="http://www.kinoma.com/kpr/1">
+	<variable id="concent" value="20" /> 
+        
+	<texture id="iconTexture" small="./assets/brainwave_state.png"/>
+	
+	<skin id="whiteskin" color="white"/>
+	
+ 	<column id="HighStriker" left="0" bottom = "-150" right="0" anchor = "STRIKER">
+	    <picture anchor = "BELL" name = "bell" left="0" height="110" right="0" url="'./assets/HighStriker_bell.png'">
+	        <behavior>
+                <method id="onLoaded" params="picture">
+                    <![CDATA[
+                        bellHeight = picture.height
+                    ]]>
+                </method>
+            </behavior>
+	        
+	    </picture>
+
+	    <container anchor = "SLIDER_RINGER" height = "1171">
+		    <picture anchor = "SLIDER" name = "slider" height="1171" url="'./assets/HighStriker_slide.png'" >
+		        <behavior>
+	                <method id="onLoaded" params="picture">
+	                    <![CDATA[
+	                        sliderRange = picture.height
+	                    ]]>
+	                </method>
+	            </behavior>
+		    </picture>
+		    <picture anchor = "RINGER" bottom = "0" name = "ringer" url="'./assets/ringer.png'"  >
+		    	<behavior>
+	                <method id="onLoaded" params="picture">
+	                    <![CDATA[
+	                        sliderRange -= picture.height
+	                    ]]>
+	                </method>
+                    <method id="onSliderScrolled" params="ringer,data">
+                        <![CDATA[
+	                        	this.followed = false // "camera" hasn't started yet
+			                	this.startBottom = ringer.coordinates.bottom;
+			                	this.endBottom = data.delta* -1 + Math.min(sliderRange,application.first.height/2)
+								trace(" ringer Bottom: " + this.endBottom + "\n")
+			                	ringer.time = 0;
+			                	ringer.duration = data.duration;
+			                	ringer.start();
+                        ]]>
+                    </method>
+                    <method id="onTimeChanged" params="ringer">
+			            <![CDATA[
+			                var ringerCoords = ringer.coordinates
+			                if(state == WIN) {
+			                    this.easeType = "bounceEaseOut"
+			                } else {
+			                	this.easeType = "quadEaseOut"
+							}	                	
+			                if (ringer.time < 0.5) this.easeType = "quadEaseIn";
+		                    ringerCoords.bottom = tween(ringer.time,ringer.duration,this.startBottom,this.endBottom, this.easeType)
+			            	ringer.coordinates = ringerCoords
+			            	// start the "camera" following a little later
+			            	if(ringer.time/ringer.duration > 0.15 && this.followed == false) {
+								application.distribute("onCameraFollow");
+								this.followed = true // only once per attentionChange
+							}			            	
+			            ]]>
+			        </method>
+			        <method id="onFinished" params="content">
+                        <![CDATA[
+			            	trace("Ringer ease: " + this.easeType + ".\n");
+                        ]]>
+                    </method>
+                </behavior>
+    		</picture>
+        </container>
+		   
+		    <picture anchor = "BASE" name = "base" height="219" url="'./assets/HighStriker_base.png'" >
+		        <behavior>
+	                <method id="onLoaded" params="picture">
+	                    <![CDATA[
+	                        baseHeight = picture.height
+	                    ]]>
+	                </method>
+	            </behavior>
+		        
+		    </picture>
+    	<behavior>
+            <method id="onCreate" params="striker">
+		        <![CDATA[
+		            this.lastAttention=0
+		            this.velocity = striker.height
+		        ]]>
+		    </method>
+	        <method id="onAttentionChanged" params="striker,result">
+	            <![CDATA[
+	                var attention = Math.round(result.attention)
+						if(attention >= 100 * difficulty ) result.attention = 100*difficulty
+	                if(attention != this.lastAttention) {
+						trace("Attention: " + result.attention + "%\n");
+	                	this.startBottom = striker.coordinates.bottom;
+						var delta =  Math.round(result.attention / -100 * sliderRange)
+	                	this.endBottom = delta - baseHeight 
+	                	
+						trace("Start offset: " + this.startBottom.toString() + "; End offset: " + this.endBottom.toString() + "; Delta: " + (this.endBottom - this.startBottom).toString())
+						
+						application.distribute("onSliderScrolled", {delta:delta, duration:striker.duration});
+	                }
+					if(attention >= 100 * difficulty ) {
+						state = WIN;
+					} else {
+	            		this.lastAttention = attention
+					}
+	                ]]>
+	        </method>
+			<method id="onCameraFollow" params="striker, delta">
+                 <![CDATA[
+					striker.time = 0;
+					striker.duration = 660;
+					striker.start();
+                 ]]>
+			</method>
+	        <method id="onTimeChanged" params="striker">
+	            <![CDATA[
+	                var coords = striker.coordinates
+	                // different ease type for second half of movement
+	                this.easeType =  (striker.time > .5) ? "sineEaseOut" : "quadEaseIn";
+	                coords.bottom = tween(striker.time,striker.duration,this.startBottom,this.endBottom, this.easeType)
+	            	striker.coordinates = coords
+	            ]]>
+	        </method>
+	        <method id="onFinished" params="striker">
+				<![CDATA[
+					if(state == WIN) {
+						striker.stop()
+						var bellSound =  new Sound("./assets/bell.mp3")
+	    				var cheerSound = new Sound("./assets/cheering.wav")
+	    				var bellCheerSound = new Sound("./assets/bellCheer.mp3")
+						bellCheerSound.play();
+						application.distribute("onReset")
+					}
+	                trace("Striker ease: " + this.easeType + ", ");
+				]]>
+			</method>
+	        
+	    </behavior>
+	    
+	</column>
+	
+	<container id="maincont" top="0" left="0" bottom="0"
+        right="0" skin="whiteskin"  active = "false">     
+        <behavior>
+        	<method id="onCreate" params="container">
+                <![CDATA[
+					this.lastAttention = 0
+                    container.wait(1000) // triggers onComplete after 1000 msecs
+                ]]>
+            </method>
+            <method id="onComplete" params="container, message">
+                <![CDATA[
+                	var changeProbability = 0.2
+                    var changed = (Math.random() > changeProbability) ? true : false;
+                    var attention = (changed) ? Math.round(Math.random() * 80) : this.lastAttention;
+					var state = PLAYING
+					var msg = new Message("/gotPacket")
+					msg.requestObject = {signalQuality:0, attention:attention, meditation:0, error:null}
+					application.invoke(msg);
+					container.wait(1000) // repeat every second, like the Force Trainer
+                ]]>
+            </method>
+            <method id="onTouchEnded" params="container, id, x, y, ticks">
+                <![CDATA[
+                	trace("Game Reset\n")
+                    application.distribute("onReset")
+                ]]>
+            </method>
+        </behavior> 
+ 	</container>    
+
+    <script>
+        <![CDATA[
+        	var PREPARING = 0
+        	var WHACK = 1
+        	var PLAYING = 2
+        	var WIN = 3
+	       	var state = PREPARING
+        	var appwin
+        	var striker
+        	var difficulty = 0.80
+        	var sliderRange, baseHeight, bellHeight
+        	
+        	var buildUI = function() {
+		       	state = PREPARING
+        		appwin = new maincont
+	        	striker = new HighStriker
+	        	appwin.add (striker);
+	            application.add (appwin);
+
+            }
+            
+            application.behavior = Behavior({
+   				onLaunch: function(application) {
+	                buildUI();
+				},
+			
+			onReset: function(application, message) {
+					application.remove(application.first);
+					buildUI();
+			   },
+			});
+
+
+Handler.bind("/gotPacket", {
+        onInvoke: function(handler, message) {
+			var result = message.requestObject;
+			application.distribute("onAttentionChanged",{attention:result.attention})
+        },
+			
+        onComplete: function(handler,message) {
+                trace(message.requestObject + "\n");
+        }
+});
+var tween = function(time,duration,start,end,easeType){
+	var soFar = easeType ? Math[easeType](time/duration) : time/duration;
+	var thisRot = (end-start)*soFar
+	thisRot += start
+	return thisRot
+}
+
+        ]]>
+    </script>
+</program>
